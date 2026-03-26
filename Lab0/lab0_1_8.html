@@ -1,0 +1,66 @@
+<!--
+Часть 1. Упражнение 8.
+Напишите функции union(set1, set2), intersection(set1, set2), difference(set1, set2),
+которые возвращают объединение, пересечение и разность множеств, не изменяя аргументов.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.1 — Упр. 8</title>
+</head>
+<body>
+  <pre id="output"></pre>
+
+  <script>
+    // Функции операций над множествами
+    function union(set1, set2) {
+      return new Set([...set1, ...set2]);
+    }
+
+    function intersection(set1, set2) {
+      return new Set([...set1].filter(x => set2.has(x)));
+    }
+
+    function difference(set1, set2) {
+      return new Set([...set1].filter(x => !set2.has(x)));
+    }
+
+    // Ввод первого множества
+    const input1 = prompt("Введите элементы первого множества через пробел (например: 1 2 3 a b):");
+    if (input1 === null) {
+      document.getElementById("output").textContent = "Ввод отменён.";
+    } else {
+      const set1 = new Set(
+        input1.split(" ").map(s => s.trim()).filter(s => s !== "") // 
+      );
+
+      // Ввод второго множества
+      const input2 = prompt("Введите элементы второго множества через пробел (например: 3 4 5 b c):");
+      if (input2 === null) {
+        document.getElementById("output").textContent = "Ввод второго множества отменён.";
+      } else {
+        const set2 = new Set(
+          input2.split(" ").map(s => s.trim()).filter(s => s !== "")
+        );
+
+        // Вычисляем операции
+        const u = union(set1, set2);
+        const i = intersection(set1, set2);
+        const d = difference(set1, set2);
+
+        // Формируем вывод
+        let output = "";
+        output += `Множество A: [${[...set1]}]\n`;
+        output += `Множество B: [${[...set2]}]\n\n`;
+
+        output += `Объединение A ∪ B: [${[...u]}]\n`;
+        output += `Пересечение A ∩ B: [${[...i]}]\n`;
+        output += `Разность A \\ B: [${[...d]}]\n`;
+
+        document.getElementById("output").textContent = output;
+      }
+    }
+  </script>
+</body>
+</html>

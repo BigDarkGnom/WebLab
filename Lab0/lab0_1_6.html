@@ -1,0 +1,63 @@
+<!--
+Часть 1. Упражнение 6.
+Вычислите размах (т.е. разность между максимальным и минимальным значениями) 
+массива с помощью метода reduce.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.1 — Упр. 6</title>
+</head>
+<body>
+  <pre id="output"></pre>
+
+  <script>
+    // Ввод массива — элементы через пробел
+    const input = prompt("Введите числа через пробел (например: 3 7 1 9 4):");
+
+    if (input === null) {
+      document.getElementById("output").textContent = "Ввод отменён.";
+    } else {
+      // Преобразуем в массив чисел
+      const numbers = input
+        .split(" ")
+        .map(str => str.trim())
+        .filter(str => str !== "")
+        .map(str => {
+          const num = Number(str);
+          if (isNaN(num)) {
+            throw new Error(`«${str}» не является числом.`);
+          }
+          return num;
+        });
+
+      if (numbers.length === 0) {
+        document.getElementById("output").textContent = "Массив пуст.";
+      } else {
+        // Вычисляем размах через reduce
+        const result = numbers.reduce(
+          (acc, val) => {
+            return {
+              min: Math.min(acc.min, val),
+              max: Math.max(acc.max, val)
+            };
+          },
+          { min: numbers[0], max: numbers[0] }
+        );
+
+        const range = result.max - result.min;
+
+        // Формируем вывод
+        let output = "";
+        output += `Исходный массив: [${numbers.join(", ")}]\n`;
+        output += `Минимум: ${result.min}\n`;
+        output += `Максимум: ${result.max}\n`;
+        output += `Размах (max - min): ${range}\n`;
+
+        document.getElementById("output").textContent = output;
+      }
+    }
+  </script>
+</body>
+</html>

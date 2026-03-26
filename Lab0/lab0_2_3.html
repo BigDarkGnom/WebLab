@@ -1,0 +1,182 @@
+<!--
+Часть 2. Упражнение 3.
+Напишите функцию sum, которая работает таким образом: sum(a)(b) = a + b.
+Например: sum(1)(2) = 3, sum(5)(-1) = 4.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.2 — Упр. 3 (sum(a)(b) и sum(a)(b)(c))</title>
+  <style>
+    body {
+      font-family: Consolas, monospace;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 0 15px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .input-group {
+      margin: 15px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 12px;
+      background: #e8f4fc;
+      border-radius: 6px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .example {
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 6px;
+      margin-top: 25px;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <h2>Упражнение 3. Функция sum(a)(b) <span id="mode-label"></span></h2>
+
+  <div class="input-group">
+    <label for="a">Введите a:</label>
+    <input type="number" id="a" value="1" step="any">
+  </div>
+
+  <div class="input-group">
+    <label for="b">Введите b:</label>
+    <input type="number" id="b" value="2" step="any">
+  </div>
+
+  <!-- Поле для c — скрыто по умолчанию, но будет показано при раскомментировании -->
+  <div class="input-group" id="c-group" style="display:none;">
+    <label for="c">Введите c:</label>
+    <input type="number" id="c" value="3" step="any">
+  </div>
+
+  <button onclick="calculate()">Вычислить</button>
+
+  <div id="result">Результат появится здесь</div>
+
+  <div class="example">
+    <strong id="example-title">Примеры (sum(a)(b)):</strong><br>
+    <span id="example-content">
+      sum(1)(2) = 3<br>
+      sum(5)(-1) = 4<br>
+      sum(3.5)(2.5) = 6
+    </span>
+  </div>
+
+  <script>
+
+    function sum(a) {
+      return function(b) {
+        return a + b;
+      };
+    }
+
+    function calculate() {
+      const aStr = document.getElementById("a").value.trim();
+      const bStr = document.getElementById("b").value.trim();
+      const resultEl = document.getElementById("result");
+
+      const a = parseFloat(aStr);
+      const b = parseFloat(bStr);
+
+      if (isNaN(a) || isNaN(b)) {
+        resultEl.textContent = "Ошибка: введите корректные числа.";
+        resultEl.style.color = "#e74c3c";
+        return;
+      }
+
+      const result = sum(a)(b);
+      resultEl.textContent = `sum(${a})(${b}) = ${result}`;
+      resultEl.style.color = "#27ae60";
+    }
+
+    // Инициализация интерфейса для режима (a, b)
+    document.getElementById("mode-label").textContent = "";
+    document.getElementById("c-group").style.display = "none";
+
+    /* 
+    закомментировать (от "function sum(a)" до "document.getElementById("c-group")...")
+
+    function sum(a) {
+      return function(b) {
+        return function(c) {
+          return (a + b + c) * c; // например: сумма * c
+        };
+      };
+    }
+
+    function calculate() {
+      const aStr = document.getElementById("a").value.trim();
+      const bStr = document.getElementById("b").value.trim();
+      const cStr = document.getElementById("c").value.trim();
+      const resultEl = document.getElementById("result");
+
+      const a = parseFloat(aStr);
+      const b = parseFloat(bStr);
+      const c = parseFloat(cStr);
+
+      if (isNaN(a) || isNaN(b) || isNaN(c)) {
+        resultEl.textContent = "Ошибка: введите корректные числа.";
+        resultEl.style.color = "#e74c3c";
+        return;
+      }
+
+      const result = sum(a)(b)(c);
+      resultEl.textContent = `sum(${a})(${b})(${c}) = (${a} + ${b} + ${c}) * ${c} = ${result}`;
+      resultEl.style.color = "#27ae60";
+    }
+
+    // Инициализация интерфейса для режима (a, b, c)
+    document.getElementById("mode-label").textContent = " с параметром c";
+    document.getElementById("c-group").style.display = "block";
+    document.getElementById("example-title").textContent = "Примеры (sum(a)(b)(c) → (a+b+c)*c):";
+    document.getElementById("example-content").innerHTML = 
+      'sum(1)(2)(3) = (1+2+3)*3 = 18<br>' +
+      'sum(2)(-1)(2) = (2-1+2)*2 = 6<br>' +
+      'sum(0)(0)(5) = (0+0+5)*5 = 25';
+    */
+    
+    // Поддержка Enter
+    document.getElementById("b").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") calculate();
+    });
+    // Если вдруг раскомментировано поле c — Enter на нём тоже сработает
+    document.getElementById("c").addEventListener("keypress", (e) => {
+      if (e.key === "Enter") calculate();
+    });
+  </script>
+</body>
+</html>

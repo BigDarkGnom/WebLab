@@ -1,0 +1,183 @@
+<!--
+Часть 2. Упражнение 4.
+Напишите функцию printNumbers(from, to), которая выводит простые числа в диапазоне
+от from до to каждые две секунды.
+Сделайте два варианта решения:
+1. Используя setInterval.
+2. Используя рекурсивный setTimeout.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.2 — Упр. 4 (Простые числа с задержкой)</title>
+  <style>
+    body {
+      font-family: Consolas, monospace;
+      max-width: 650px;
+      margin: 20px auto;
+      padding: 0 15px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .input-group {
+      margin: 12px 0;
+    }
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 12px;
+      background: #f8f9fa;
+      border-radius: 6px;
+      min-height: 50px;
+    }
+    .log-entry {
+      margin: 4px 0;
+      color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <h2>Упражнение 4. Вывод простых чисел с задержкой</h2>
+
+  <div class="input-group">
+    <label for="from">От (from):</label>
+    <input type="number" id="from" value="10">
+  </div>
+
+  <div class="input-group">
+    <label for="to">До (to):</label>
+    <input type="number" id="to" value="30">
+  </div>
+
+  <div class="input-group">
+    <label for="method">Способ реализации:</label>
+    <select id="method">
+      <option value="interval">1. setInterval</option>
+      <option value="timeout">2. рекурсивный setTimeout</option>
+    </select>
+  </div>
+
+  <button onclick="startPrint()">Запустить вывод</button>
+  <button onclick="clearLog()" style="background:#e74c3c;margin-top:8px;">Очистить лог</button>
+
+  <div id="log"></div>
+
+  <script>
+    // Проверка на простое число
+    function isPrime(n) {
+      if (n < 2) return false;
+      if (n === 2) return true;
+      if (n % 2 === 0) return false;
+      for (let i = 3; i <= Math.sqrt(n); i += 2) {
+        if (n % i === 0) return false;
+      }
+      return true;
+    }
+
+    // Получение всех простых в диапазоне
+    function getPrimes(from, to) {
+      const primes = [];
+      for (let n = Math.max(2, from); n <= to; n++) {
+        if (isPrime(n)) primes.push(n);
+      }
+      return primes;
+    }
+
+    // Логирование
+    function log(msg) {
+      const logEl = document.getElementById("log");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // === Вариант 1: setInterval ===
+    function printWithInterval(primes) {
+      let i = 0;
+      const intervalId = setInterval(() => {
+        if (i < primes.length) {
+          log(`(setInterval) Простое число: ${primes[i]}`);
+          i++;
+        } else {
+          clearInterval(intervalId);
+          log("(setInterval) Вывод завершён.");
+        }
+      }, 2000);
+    }
+
+    // === Вариант 2: рекурсивный setTimeout ===
+    function printWithTimeout(primes, index = 0) {
+      if (index >= primes.length) {
+        log("(setTimeout) Вывод завершён.");
+        return;
+      }
+      log(`(setTimeout) Простое число: ${primes[index]}`);
+      setTimeout(() => printWithTimeout(primes, index + 1), 2000);
+    }
+
+    // === Запуск ===
+    function startPrint() {
+      const from = parseInt(document.getElementById("from").value);
+      const to = parseInt(document.getElementById("to").value);
+      const method = document.getElementById("method").value;
+
+      if (isNaN(from) || isNaN(to)) {
+        log("Ошибка: введите корректные числа.");
+        return;
+      }
+      if (from > to) {
+        log("Ошибка: 'от' должно быть <= 'до'.");
+        return;
+      }
+
+      const primes = getPrimes(from, to);
+      if (primes.length === 0) {
+        log("Нет простых чисел в указанном диапазоне.");
+        return;
+      }
+
+      log(`Найдено простых чисел: [${primes.join(", ")}]`);
+      log(`Начинаю вывод...`);
+
+      if (method === "interval") {
+        printWithInterval(primes);
+      } else {
+        printWithTimeout(primes);
+      }
+    }
+
+    function clearLog() {
+      document.getElementById("log").innerHTML = "";
+    }
+  </script>
+</body>
+</html>

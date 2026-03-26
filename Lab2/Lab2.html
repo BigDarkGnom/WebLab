@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №2 - Воздушные шарики</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .balloon-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .balloon-wrapper {
+            position: relative;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .balloon-wrapper:hover {
+            transform: scale(1.1);
+        }
+
+        .balloon {
+            width: 150px;
+            height: 200px;
+            object-fit: contain;
+            transition: opacity 0.5s ease;
+        }
+
+        .balloon.popped {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .prize-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.95);
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            white-space: nowrap;
+            z-index: 10;
+        }
+
+        .prize-text.show {
+            opacity: 1;
+        }
+
+        .attempts-counter {
+            text-align: center;
+            color: white;
+            font-size: 20px;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 15px;
+            border-radius: 10px;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .reset-btn {
+            display: none;
+            margin: 20px auto;
+            padding: 15px 40px;
+            font-size: 18px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: #45a049;
+        }
+
+        /* Стили для списка призов */
+        .prizes-container {
+            display: none;
+            max-width: 600px;
+            margin: 30px auto;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .prizes-container h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .prizes-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .prizes-list li {
+            padding: 12px 20px;
+            margin: 10px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: slideIn 0.5s ease;
+        }
+
+        .prizes-list li:nth-child(even) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .prizes-list li.try-again {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            opacity: 0.7;
+        }
+
+        .total-prizes {
+            margin-top: 20px;
+            padding: 15px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .balloon-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .balloon-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>🎈 Лопни шарик и выиграй приз! 🎈</h1>
+    
+    <div class="attempts-counter">
+        Попыток осталось: <span id="attempts">3</span>
+    </div>
+
+    <div class="balloon-container" id="balloonContainer">
+        <!-- Шарики будут добавлены через JavaScript -->
+    </div>
+
+    <!-- Контейнер для отображения призов -->
+    <div class="prizes-container" id="prizesContainer">
+        <h2>🎁 Ваши призы 🎁</h2>
+        <ul class="prizes-list" id="prizesList"></ul>
+        <div class="total-prizes" id="totalPrizes"></div>
+    </div>
+
+    <button class="reset-btn" id="resetBtn" onclick="resetGame()">Начать заново</button>
+
+    <script>
+        // Массив призов
+        const prizes = [
+            "🎁 Скидка 50%!",
+            "🏆 Главный приз!",
+            "🎫 Бесплатный билет!",
+            "🍫 Шоколадка!",
+            "📱 Чехол для телефона!",
+            "☕ Чашка кофе!",
+            "📚 Книга!",
+            "🎵 Подписка на музыку!",
+            "😔 Попробуй ещё раз!"
+        ];
+
+        // Пути к изображениям шариков
+        const balloonImages = [
+            "balloon1.jpg",  // красный
+            "balloon2.jpg",  // синий
+            "balloon3.jpg",  // зеленый
+            "balloon4.jpg",  // желтый
+            "balloon5.jpg",  // фиолетовый
+            "balloon6.jpg",  // оранжевый
+            "balloon7.jpg",  // розовый
+            "balloon8.jpg",  // голубой
+            "balloon9.jpg"   // малиновый
+        ];
+
+        let attempts = 3;
+        let poppedBalloons = 0;
+        let userPrizes = []; // Массив для хранения призов пользователя
+
+        // Инициализация игры
+        function initGame() {
+            const container = document.getElementById('balloonContainer');
+            container.innerHTML = '';
+
+            balloonImages.forEach((imgSrc, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'balloon-wrapper';
+                wrapper.onclick = () => popBalloon(wrapper, index);
+
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.alt = `Воздушный шарик ${index + 1}`;
+                img.className = 'balloon';
+                img.id = `balloon-${index}`;
+
+                const prizeText = document.createElement('div');
+                prizeText.className = 'prize-text';
+                prizeText.id = `prize-${index}`;
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(prizeText);
+                container.appendChild(wrapper);
+            });
+
+            attempts = 3;
+            poppedBalloons = 0;
+            userPrizes = []; // Очищаем призы
+            updateAttempts();
+            document.getElementById('resetBtn').style.display = 'none';
+            document.getElementById('prizesContainer').style.display = 'none';
+        }
+
+        // Лопание шарика
+        function popBalloon(wrapper, index) {
+            if (attempts <= 0) return;
+
+            const balloon = wrapper.querySelector('.balloon');
+            const prizeText = wrapper.querySelector('.prize-text');
+
+            if (balloon.classList.contains('popped')) return;
+
+            // Лопаем шарик
+            balloon.classList.add('popped');
+            
+            // Выбираем случайный приз
+            const prize = prizes[Math.floor(Math.random() * prizes.length)];
+            
+            // Сохраняем приз в массив
+            userPrizes.push(prize);
+            
+            // Показываем приз
+            prizeText.textContent = prize;
+            prizeText.classList.add('show');
+
+            // Уменьшаем счётчик попыток
+            attempts--;
+            poppedBalloons++;
+            updateAttempts();
+
+            // Проверяем, закончились ли попытки
+            if (attempts <= 0) {
+                setTimeout(() => {
+                    showEndGameDialog();
+                }, 500);
+            }
+        }
+
+        // Показ диалога в конце игры
+        function showEndGameDialog() {
+            const wantsRestart = confirm(
+                `🎈 Попытки закончились!\n\n` +
+                `Вы лопнули ${poppedBalloons} шариков.\n` +
+                `Выиграно призов: ${userPrizes.filter(p => !p.includes('Попробуй ещё раз')).length}\n\n` +
+                `Хотите начать заново?\n\n` +
+                `Нажмите "Да" - чтобы начать сначала\n` +
+                `Нажмите "Нет" - чтобы увидеть список призов`
+            );
+
+            if (wantsRestart) {
+                resetGame();
+            } else {
+                showPrizesList();
+            }
+        }
+
+        // Показ списка призов
+        function showPrizesList() {
+            const prizesContainer = document.getElementById('prizesContainer');
+            const prizesList = document.getElementById('prizesList');
+            const totalPrizes = document.getElementById('totalPrizes');
+            
+            prizesList.innerHTML = '';
+            
+            // Добавляем каждый приз в список
+            userPrizes.forEach((prize, index) => {
+                const li = document.createElement('li');
+                li.textContent = `${index + 1}. ${prize}`;
+                
+                if (prize.includes('Попробуй ещё раз')) {
+                    li.className = 'try-again';
+                }
+                
+                prizesList.appendChild(li);
+            });
+            
+            // Подсчитываем выигрышные призы
+            const winningPrizes = userPrizes.filter(p => !p.includes('Попробуй ещё раз'));
+            const totalText = winningPrizes.length > 0 
+                ? `🎉 Всего выиграно: ${winningPrizes.length} приз(ов)! 🎉`
+                : '😔 К сожалению, вы ничего не выиграли. Попробуйте ещё раз!';
+            
+            totalPrizes.textContent = totalText;
+            
+            // Показываем контейнер с призами
+            prizesContainer.style.display = 'block';
+            
+            // Показываем кнопку сброса
+            document.getElementById('resetBtn').style.display = 'block';
+            
+            // Прокручиваем к списку призов
+            prizesContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Обновление счётчика попыток
+        function updateAttempts() {
+            document.getElementById('attempts').textContent = attempts;
+        }
+
+        // Сброс игры
+        function resetGame() {
+            document.getElementById('prizesContainer').style.display = 'none';
+            initGame();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Запуск игры при загрузке страницы
+        window.onload = initGame;
+    </script>
+</body>
+</html>

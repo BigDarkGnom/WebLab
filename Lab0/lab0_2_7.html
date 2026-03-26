@@ -1,0 +1,96 @@
+<!--
+Часть 2. Упражнение 7.
+Создайте класс FormatError, который наследует от встроенного класса SyntaxError.
+Класс должен поддерживать свойства message, name и stack.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.2 — Упр. 7 (FormatError)</title>
+  <style>
+    body {
+      font-family: Consolas, monospace;
+      max-width: 750px;
+      margin: 25px auto;
+      padding: 0 15px;
+      background: #fff;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .demo {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e8f4fc;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>Упражнение 7. Класс FormatError (наследник SyntaxError)</h2>
+
+  <div class="demo">
+    <p>Создаётся объект: <code>new FormatError("ошибка форматирования")</code></p>
+    <button onclick="runDemo()">Запустить демонстрацию</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    // === КЛАСС FormatError ===
+    class FormatError extends SyntaxError {
+      constructor(message) {
+        // super(message) — вызывает конструктор родительского класса SyntaxError,
+        // чтобы правильно инициализировать объект ошибки (включая message и stack).
+        super(message); //
+        this.name = "FormatError"; // Устанавливаем имя ошибки
+        // this.message унаследован от SyntaxError
+        // this.stack устанавливается автоматически движком
+      }
+    }
+
+    // === ДЕМОНСТРАЦИЯ ===
+    function runDemo() {
+      const err = new FormatError("ошибка форматирования");
+
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+
+      output.innerHTML += `err.message = "${err.message}"\n`;
+      output.innerHTML += `err.name    = "${err.name}"\n`;
+      output.innerHTML += `err.stack   = ${err.stack ? "(см. консоль)" : "undefined"}\n\n`;
+
+      // Оператор instanceof проверяет, является ли объект экземпляром указанного класса.
+      // Так как FormatError наследует от SyntaxError, обе проверки вернут true.
+      output.innerHTML += `err instanceof FormatError = ${err instanceof FormatError}\n`;
+      output.innerHTML += `err instanceof SyntaxError = ${err instanceof SyntaxError}\n`;
+
+      // Вывод стека в консоль (он длинный)
+      console.log("Стек вызовов (err.stack):", err.stack);
+    }
+  </script>
+</body>
+</html>

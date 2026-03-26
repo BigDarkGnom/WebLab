@@ -1,0 +1,72 @@
+<!--
+Часть 1. Упражнение 5.
+Напишите функцию, которая возвращает все позиции заданного значения в массиве.
+Например, indexOf(arr, 0) возвращает все такие индексы i, что arr[i] равно нулю.
+Воспользуйтесь методами map и filter.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.1 — Упр. 5</title>
+</head>
+<body>
+  <pre id="output"></pre>
+
+  <script>
+    // Функция поиска всех индексов значения в массиве
+    function indexOfAll(arr, value) {
+      return arr
+        .map((el, index) => el === value ? index : -1)
+        .filter(index => index !== -1);
+    }
+
+    // Ввод массива — элементы через пробел
+    const arrayInput = prompt("Введите элементы массива через пробел (например: 1 0 2 0 3 0)");
+
+    if (arrayInput === null) {
+      document.getElementById("output").textContent = "Ввод отменён.";
+    } else {
+      // Разбиваем по пробелам и обрабатываем каждый элемент
+      const userArray = arrayInput
+        .split(" ")
+        .map(str => {
+          const trimmed = str.trim();
+          if (trimmed === "") return undefined; // пропускаем пустые (если были лишние пробелы)
+          const num = Number(trimmed);
+          return !isNaN(num) && trimmed !== "" ? num : trimmed;
+        })
+        .filter(el => el !== undefined); // удаляем пустые элементы
+
+      // Ввод искомого значения
+      const valueInput = prompt("Введите значение для поиска (например: 0 или текст):");
+      if (valueInput === null) {
+        document.getElementById("output").textContent = "Ввод значения отменён.";
+      } else {
+        const trimmedValue = valueInput.trim();
+        const searchValue = (() => {
+          const num = Number(trimmedValue);
+          return !isNaN(num) && trimmedValue !== "" ? num : trimmedValue;
+        })();
+
+        const indices = indexOfAll(userArray, searchValue);
+
+        // Форматируем вывод: числа без кавычек, строки — в кавычках
+        const formatElement = el => (typeof el === "string" ? `"${el}"` : el);
+        const formattedArray = userArray.map(formatElement).join(", ");
+
+        let output = "";
+        output += `Ваш массив: [${formattedArray}]\n`;
+        output += `Ищем значение: ${typeof searchValue === "string" ? `"${searchValue}"` : searchValue}\n`;
+        if (indices.length === 0) {
+          output += "Значение не найдено.\n";
+        } else {
+          output += `Индексы вхождений: [${indices.join(", ")}]\n`;
+        }
+
+        document.getElementById("output").textContent = output;
+      }
+    }
+  </script>
+</body>
+</html>

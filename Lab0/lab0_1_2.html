@@ -1,0 +1,50 @@
+<!--
+Часть 1. Упражнение 2.
+Напишите сценарий, который запрашивает у пользователя название месяца, и выводит на экран
+количество дней в нем (считать, что год – не високосный). Название нужно вводить по-русски.
+Подумайте о том, что разные пользователи могут по-разному печатать названия месяцев
+(Май, май, МАЙ или даже МаЙ). Подсказка: прочтите про методы работы со строками.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.1 — Упр. 2</title>
+</head>
+<body>
+  <p id="output"></p>
+
+  <script>
+    const monthsByDays = {
+      31: ["январь", "март", "май", "июль", "август", "октябрь", "декабрь"],
+      30: ["апрель", "июнь", "сентябрь", "ноябрь"],
+      28: ["февраль"]
+    };
+
+    const daysInMonth = {};
+    for (const [days, months] of Object.entries(monthsByDays)) {
+      for (const month of months) {
+        daysInMonth[month] = Number(days);
+      }
+    }
+
+    const input = prompt("Введите название месяца по-русски (например: май, Октябрь):");
+    const outputEl = document.getElementById("output");
+
+    if (input === null) {
+      outputEl.textContent = "Вы отменили ввод.";
+    } else {
+      const month = input.trim().toLowerCase();
+
+      if (daysInMonth.hasOwnProperty(month)) {
+        const days = daysInMonth[month];
+        const word = days === 31 ? "день" : "дней";
+        outputEl.textContent = `В месяце "${month}" ${days} ${word}.`;
+
+      } else {
+        outputEl.textContent = `«${input}» — такого месяца нет. Введите, пожалуйста, по-русски.`;
+      }
+    }
+  </script>
+</body>
+</html>

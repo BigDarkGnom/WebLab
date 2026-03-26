@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №1: Простые элементы DOM</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 40px;
+        }
+
+        /* Стили для кнопок */
+        .plant-btn {
+            display: block;
+            margin-bottom: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            background-color: #f0f0f0;
+            transition: all 0.3s ease;
+        }
+
+        /* Класс для активного состояния кнопки (при наведении на список) */
+        .plant-btn.active-hover {
+            background-color: red !important;
+            color: white !important;
+            font-weight: bold !important;
+            border-color: red;
+        }
+
+        /* Стили для списка */
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            cursor: default;
+            transition: all 0.3s ease;
+            color: black;
+            font-weight: normal;
+        }
+
+        /* Класс для выделенного пункта списка (при клике на кнопку) */
+        li.highlighted {
+            color: red;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Лабораторная работа №1</h2>
+    <p>Нажмите на кнопку, чтобы выделить описание. Наведите мышь на описание, чтобы подсветить кнопку.</p>
+
+    <div class="container">
+        <!-- Блок с кнопками -->
+        <div id="buttons-block">
+            <!-- Атрибут data-target указывает, какой пункт списка активировать -->
+            <button class="plant-btn" data-target="rose">Роза</button>
+            <button class="plant-btn" data-target="tulip">Тюльпан</button>
+            <button class="plant-btn" data-target="cactus">Кактус</button>
+            <button class="plant-btn" data-target="oak">Дуб</button>
+        </div>
+
+        <!-- Блок со списком -->
+        <div>
+            <ul id="plants-list">
+                <!-- Атрибут data-id соответствует data-target у кнопки -->
+                <li data-id="rose">Пышно цветущая, колючая, многолетняя, садовая.</li>
+                <li data-id="tulip">Луковичное, ранневесеннее, яркое, однолетнее (в культуре).</li>
+                <li data-id="cactus">Суккулент, засухоустойчивое, колючее, комнатное.</li>
+                <li data-id="oak">Мощное, долгоживущее, лиственное, лесное.</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const buttons = document.querySelectorAll('.plant-btn');
+            const listContainer = document.getElementById('plants-list');
+            const listItems = document.querySelectorAll('#plants-list li');
+
+            // 1. Логика клика по кнопке
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Сбрасываем выделение со всех пунктов списка (делаем их черными и нежирными)
+                    listItems.forEach(item => {
+                        item.classList.remove('highlighted');
+                    });
+
+                    // Получаем ID целевого элемента из атрибута data-target
+                    const targetId = button.getAttribute('data-target');
+                    
+                    // Находим соответствующий пункт списка
+                    const targetItem = document.querySelector(`li[data-id="${targetId}"]`);
+
+                    // Если элемент найден, выделяем его
+                    if (targetItem) {
+                        targetItem.classList.add('highlighted');
+                    }
+                });
+            });
+
+            // 2. Логика наведения мыши на пункт списка (Делегирование событий)
+            // Вешаем событие на родительский UL, а не на каждый LI отдельно
+            listContainer.addEventListener('mouseover', (event) => {
+                // Проверяем, что навели именно на LI
+                if (event.target.tagName === 'LI') {
+                    const itemId = event.target.getAttribute('data-id');
+                    
+                    // Находим соответствующую кнопку
+                    const correspondingBtn = document.querySelector(`button[data-target="${itemId}"]`);
+                    
+                    if (correspondingBtn) {
+                        correspondingBtn.classList.add('active-hover');
+                    }
+                }
+            });
+
+            listContainer.addEventListener('mouseout', (event) => {
+                if (event.target.tagName === 'LI') {
+                    const itemId = event.target.getAttribute('data-id');
+                    const correspondingBtn = document.querySelector(`button[data-target="${itemId}"]`);
+                    
+                    if (correspondingBtn) {
+                        correspondingBtn.classList.remove('active-hover');
+                    }
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

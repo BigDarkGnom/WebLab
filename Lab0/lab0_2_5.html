@@ -1,0 +1,126 @@
+<!--
+Часть 2. Упражнение 5.
+Создайте декоратор delay(f, ms), который задерживает каждый вызов f на ms миллисекунд.
+Решение должно передавать все аргументы и контекст this.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.2 — Упр. 5 (Декоратор delay)</title>
+  <style>
+    body {
+      font-family: Consolas, monospace;
+      max-width: 700px;
+      margin: 25px auto;
+      padding: 0 15px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .demo {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 8px 0;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 12px;
+      background: #e8f4fc;
+      border-radius: 6px;
+      min-height: 40px;
+    }
+    .log-entry {
+      margin: 4px 0;
+      color: #27ae60;
+    }
+  </style>
+</head>
+<body>
+  <h2>Упражнение 5. Декоратор delay(f, ms)</h2>
+
+  <div class="demo">
+    <p><strong>Демонстрация:</strong></p>
+    <button onclick="runAlertExample()">1. delay(alert, 1000)("Привет!")</button>
+    <button onclick="runMultiArgExample()">2. delay(consoleLog, 800)(1, 2, "тест")</button>
+    <button onclick="runThisExample()">3. delay с контекстом this (см. консоль)</button>
+  </div>
+
+  <div id="log"></div>
+
+  <script>
+    // === ДЕКОРАТОР delay ===
+    function delay(f, ms) {
+      return function(...args) {
+        setTimeout(() => {
+          f.apply(this, args); //
+        }, ms);
+      };
+    }
+    // f.apply(this, args) — вызывает f с:
+          // - тем же контекстом `this`, с которым была вызвана обёртка,
+          // - всеми аргументами `args` (массив, распакованный в параметры функции).
+          // Это гарантирует, что декоратор работает корректно даже для методов объектов.
+
+    // === ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ДЛЯ ДЕМОНСТРАЦИИ ===
+    function log(msg) {
+      const logEl = document.getElementById("log");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+      console.log(msg);
+    }
+
+    // Пример 1: задержка alert
+    function runAlertExample() {
+      const delayedAlert = delay(alert, 1000);
+      delayedAlert("Привет из delay(alert, 1000)!");
+      log("Запущен отложенный alert (появится через 1 сек).");
+    }
+
+    // Пример 2: функция с несколькими аргументами
+    function consoleLog(...args) {
+      log("Функция consoleLog вызвана с аргументами: " + JSON.stringify(args));
+    }
+
+    function runMultiArgExample() {
+      const delayedLog = delay(consoleLog, 800);
+      delayedLog(1, 2, "тест", { key: "value" });
+      log("Запущен отложенный вызов с несколькими аргументами (появится через 0.8 сек).");
+    }
+
+    // Пример 3: передача контекста this
+    function runThisExample() {
+      const obj = {
+        name: "Объект",
+        greet: function(message) {
+          log(`[${this.name}] говорит: ${message}`);
+        }
+      };
+
+      const delayedGreet = delay(obj.greet, 1200);
+      // Вызываем в контексте obj
+      delayedGreet.call(obj, "Привет из контекста!");
+      log("Запущен отложенный вызов с передачей this (появится через 1.2 сек).");
+    }
+  </script>
+</body>
+</html>

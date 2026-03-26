@@ -1,0 +1,46 @@
+<!--
+Часть 1. Упражнение 4.
+Предположим, что объект, представляющий сообщение, имеет свойства для даты и отправителя.
+Отсортируйте массив сообщений сначала по дате, а затем по отправителю.
+Убедитесь, что метод sort действительно устойчивый: сообщения с одинаковым отправителем остаются отсортированными по дате после второй сортировки.
+Количество сообщений должен вводить пользователь, для каждого сообщения пользователь же вводит дату и отправителя.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.1 — Упр. 4</title>
+</head>
+<body>
+  <pre id="output"></pre>
+
+  <script>
+    const count = parseInt(prompt("Сколько сообщений?"), 10);
+    const messages = [];
+
+    for (let i = 0; i < count; i++) {
+      const dateStr = prompt(`Дата сообщения ${i + 1} (в формате ГГГГ-ММ-ДД):`);
+      const sender = prompt(`Отправитель сообщения ${i + 1}:`);
+      messages.push({ date: new Date(dateStr), sender });
+    }
+    
+    messages.sort((a, b) => {
+      const dateDiff = a.date - b.date;
+      if (dateDiff !== 0) {
+        return dateDiff; // если даты разные — сортируем по дате
+      }
+      // Если даты одинаковые — сортируем по отправителю
+      return a.sender.localeCompare(b.sender); 
+    });
+
+    let output = "Отсортированные сообщения:\n";
+    messages.forEach(msg => {
+      const dateStr = msg.date.toISOString().split('T')[0];
+      output += `Дата: ${dateStr} | Отправитель: ${msg.sender}\n`;
+    });
+
+    document.getElementById("output").textContent = output;
+    console.log(messages);
+  </script>
+</body>
+</html>

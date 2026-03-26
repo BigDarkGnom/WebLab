@@ -1,0 +1,79 @@
+<!--
+Часть 1. Упражнение 7.
+Напишите функции map, filter, forEach для множеств.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.1 — Упр. 7</title>
+</head>
+<body>
+  <pre id="output"></pre>
+
+  <script>
+    // Функции для работы с Set
+    function mapSet(set, fn) {
+      const result = new Set();
+      for (const item of set) result.add(fn(item));
+      return result;
+    }
+
+    function filterSet(set, predicate) {
+      const result = new Set();
+      for (const item of set) if (predicate(item)) result.add(item);
+      return result;
+    }
+
+    function forEachSet(set, fn) {
+      const collected = [];
+      for (const item of set) {
+        const result = fn(item);
+        if (result !== undefined) collected.add(result);
+      }
+      return collected; // возвращаем результаты для вывода
+    }
+
+    // Ввод множества
+    const input = prompt("Введите элементы множества через пробел (например: 1 2 3 a b):");
+    if (input === null) {
+      document.getElementById("output").textContent = "Ввод отменён.";
+    } else {
+      const elements = input
+        .split(" ")
+        .map(s => s.trim())
+        .filter(s => s !== "");
+
+      const userSet = new Set(elements);
+
+      let output = "";
+      output += `Исходное множество: [${[...userSet]}]\n\n`;
+
+      // 1. map: числа * 2, строки → в верхний регистр
+      const mapped = mapSet(userSet, item => {
+        const num = Number(item);
+        return isNaN(num) ? item.toUpperCase() : num * 2;
+      });
+      output += `Результат map (числа ×2, строки → ВЕРХНИЙ РЕГИСТР):\n[${[...mapped]}]\n\n`;
+
+      // 2. filter: только числа
+      const filtered = filterSet(userSet, item => !isNaN(Number(item)));
+      output += `Результат filter (только числа):\n[${[...filtered]}]\n\n`;
+
+      // 3. forEach: преобразуем каждый элемент в строку для вывода
+      const forEachOutput = [];
+      forEachSet(userSet, item => {
+        const num = Number(item);
+        const desc = isNaN(num)
+          ? `«${item}» — строка`
+          : `${item} — число`;
+        forEachOutput.push(desc);
+        console.log(desc); // дублируем в консоль
+      });
+      output += `Результат forEach (анализ каждого элемента):\n${forEachOutput.join("\n")}\n`;
+
+      document.getElementById("output").textContent = output;
+    }
+  </script>
+</body>
+</html>

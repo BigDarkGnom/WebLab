@@ -1,0 +1,154 @@
+<!--
+Часть 2. Упражнение 6.
+Напишите иерархию классов «Сказочный персонаж» → «Дракон».
+Каждый класс: ≥2 поля, ≥2 метода (кроме конструктора, геттеров/сеттеров).
+Реализуйте конструкторы, геттеры, сеттеры.
+Продемонстрируйте переопределение унаследованного метода.
+Продемонстрируйте работу классов.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.2 — Упр. 6 (Иерархия классов)</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      max-width: 750px;
+      margin: 25px auto;
+      padding: 0 15px;
+      line-height: 1.6;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .demo {
+      background: #f8f9fa;
+      padding: 18px;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    .character {
+      margin: 12px 0;
+      padding: 12px;
+      background: white;
+      border-radius: 8px;
+      border-left: 4px solid #3498db;
+    }
+    .dragon {
+      border-left-color: #e74c3c;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #2980b9;
+    }
+    #output {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e8f4fc;
+      border-radius: 8px;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>Упражнение 6. Иерархия: Сказочный персонаж → Дракон</h2>
+
+  <div class="demo">
+    <p><strong>Демонстрация:</strong></p>
+    <div class="character">Создан персонаж: <code>FairyTaleCharacter("Баба Яга", 300)</code></div>
+    <div class="dragon">Создан дракон: <code>Dragon("Змей Горыныч", 500, "зелёный", 25)</code></div>
+    <button onclick="runDemo()">Запустить демонстрацию</button>
+  </div>
+
+  <div id="output"></div>
+
+  <script>
+    // === БАЗОВЫЙ КЛАСС ===
+    class FairyTaleCharacter {
+      constructor(name, age) {
+        this._name = name;
+        this._age = age;
+      }
+
+      // Геттеры и сеттеры
+      get name() { return this._name + "!!!"; }
+      set name(value) { this._name = value; }
+
+      get age() { return this._age; }
+      set age(value) { this._age = value; }
+
+      // Собственные методы
+      greet() {
+        // return `Здравствуйте! Меня зовут ${this._name}.`;
+        return `Здравствуйте! Меня зовут ${this.name}.`;
+      }
+
+      describe() {
+        return `Персонаж: ${this._name}, возраст: ${this.age} лет.`;
+      }
+    }
+
+    // === ПОТОМОК ===
+    class Dragon extends FairyTaleCharacter {
+      constructor(name, age, color, wingSpan) {
+        super(name, age);
+        this._color = color;
+        this._wingSpan = wingSpan; // размах крыльев в метрах
+      }
+
+      // Геттеры и сеттеры
+      get color() { return this._color; }
+      set color(value) { this._color = value; }
+
+      get wingSpan() { return this._wingSpan; }
+      set wingSpan(value) { this._wingSpan = value; }
+
+      // Собственный метод
+      breatheFire() {
+        return `${this._name} выпускает огненное дыхание!`;
+      }
+
+      // ПЕРЕОПРЕДЕЛЁННЫЙ метод
+      describe() {
+        return `Дракон: ${this._name}, возраст: ${this._age} лет, цвет: ${this._color}, размах крыльев: ${this._wingSpan} м.`;
+      }
+    }
+
+    // === ДЕМОНСТРАЦИЯ ===
+    function runDemo() {
+      const output = document.getElementById("output");
+      output.innerHTML = "";
+
+      // Создаём персонажа
+      const witch = new FairyTaleCharacter("Баба Яга", 300);
+      output.innerHTML += "=== СКАЗОЧНЫЙ ПЕРСОНАЖ ===\n";
+      output.innerHTML += witch.greet() + "\n";
+      output.innerHTML += witch.describe() + "\n\n";
+
+      // Создаём дракона
+      const dragon = new Dragon("Змей Горыныч", 500, "зелёный", 25);
+      output.innerHTML += "=== ДРАКОН (наследник) ===\n";
+      output.innerHTML += dragon.greet() + "\n";            // унаследовано
+      output.innerHTML += dragon.describe() + "\n";         // переопределено
+      output.innerHTML += dragon.breatheFire() + "\n\n";    // собственный
+
+      // Пример сеттера
+      dragon.color = "огненно-красный";
+      output.innerHTML += "После изменения цвета:\n";
+      output.innerHTML += dragon.describe() + "\n";
+    }
+  </script>
+</body>
+</html>

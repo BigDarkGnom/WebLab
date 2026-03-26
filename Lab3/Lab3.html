@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №3: Меню-печатная машинка</title>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace; /* Шрифт как у печатной машинки */
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        /* Стили для контейнера меню */
+        .menu-container {
+            background-color: #fff;
+            padding: 20px;
+            border: 2px solid #333;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.2);
+            width: 300px;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Стили для списка */
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Стили для ссылок (пунктов меню) */
+        .menu-item {
+            display: block;
+            text-decoration: none;
+            color: #333;
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            white-space: nowrap; /* Чтобы текст не переносился при печати */
+            overflow: hidden;
+        }
+
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+
+        .menu-item:hover {
+            background-color: #333;
+            color: #fff;
+        }
+
+        /* Курсор для эффекта печати */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: red;
+            margin-left: 2px;
+            animation: blink 0.5s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="menu-container">
+        <h2>Навигация</h2>
+        <nav>
+            <ul>
+                <!-- Пункты меню. href="#" замените на реальные ссылки -->
+                <li><a href="page1.html" class="menu-item" data-text="Главная страница">Главная страница</a></li>
+                <li><a href="page2.html" class="menu-item" data-text="О нас">О нас</a></li>
+                <li><a href="page3.html" class="menu-item" data-text="Услуги">Услуги</a></li>
+                <li><a href="page4.html" class="menu-item" data-text="Контакты">Контакты</a></li>
+                <li><a href="page5.html" class="menu-item" data-text="Портфолио">Портфолио</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <script>
+    const menuItems = document.querySelectorAll('.menu-item');
+
+    menuItems.forEach(item => {
+        const originalText = item.innerText;
+        
+        // Создаем индивидуальные таймеры для КАЖДОГО элемента
+        // Это главная фишка исправления: элементы не мешают друг другу
+        let typeTimer = null;
+        let eraseTimer = null;
+        let isTyping = false;
+        let isErasing = false;
+
+        // --- НАВЕДЕНИЕ (Печать) ---
+        item.addEventListener('mouseenter', () => {
+            // 1. Сбрасываем всё, что могло остаться с прошлого раза
+            if (eraseTimer) clearInterval(eraseTimer);
+            if (typeTimer) clearInterval(typeTimer);
+            
+            isErasing = false;
+            isTyping = true;
+            
+            let currentText = "";
+            let charIndex = 0;
+
+            // 2. Очищаем поле перед началом печати
+            item.innerText = "";
+
+            // 3. Запускаем печать
+            typeTimer = setInterval(() => {
+                if (charIndex < originalText.length) {
+                    currentText += originalText[charIndex];
+                    item.innerText = currentText;
+                    charIndex++;
+                } else {
+                    // Печать закончена
+                    clearInterval(typeTimer);
+                    typeTimer = null;
+                    isTyping = false;
+                }
+            }, 100); // Скорость печати
+        });
+
+        // --- УХОД МЫШИ (Стирание) ---
+        item.addEventListener('mouseleave', () => {
+            // 1. Если мышь ушла во время печати — останавливаем печать
+            if (typeTimer) clearInterval(typeTimer);
+            if (eraseTimer) clearInterval(eraseTimer); // На всякий случай
+
+            isTyping = false;
+            isErasing = true;
+
+            // 2. Берем текущий текст (он может быть не дописан до конца)
+            let currentText = item.innerText;
+
+            // 3. Запускаем стирание
+            eraseTimer = setInterval(() => {
+                if (currentText.length > 0) {
+                    currentText = currentText.slice(0, -1);
+                    item.innerText = currentText;
+                } else {
+                    // Всё стёрто — восстанавливаем оригинал
+                    clearInterval(eraseTimer);
+                    eraseTimer = null;
+                    isErasing = false;
+                    item.innerText = originalText;
+                }
+            }, 50); // Скорость стирания (быстрее печати)
+        });
+    });
+</script>
+</body>
+</html>

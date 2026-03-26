@@ -1,0 +1,215 @@
+<!--
+Часть 2. Упражнение 2.
+Массив messages управляется извне: добавляются/удаляются сообщения в случайное время.
+Нельзя модифицировать объекты сообщений.
+Нужно отслеживать прочтение через WeakSet.
+Полный лог — и на странице, и в консоли.
+-->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Лаб 0.2 — Упр. 2 (WeakSet + Полный лог)</title>
+  <style>
+    body {
+      font-family: Consolas, monospace;
+      max-width: 800px;
+      margin: 15px auto;
+      padding: 0 10px;
+      background: #fff;
+      color: #222;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .messages { margin: 15px 0; }
+    .message {
+      background: #f0f8ff;
+      padding: 8px;
+      margin: 6px 0;
+      border-left: 3px solid #3498db;
+    }
+    .read { background: #e8f5e9; border-left-color: #27ae60; }
+    button.read-btn {
+      margin-left: 8px;
+      padding: 2px 8px;
+      font-size: 12px;
+      background: #3498db;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    button.read-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    #log {
+      margin-top: 20px;
+      padding: 10px;
+      background: #fdf6e3;
+      border: 1px solid #eee5b5;
+      border-radius: 4px;
+      height: 200px;
+      overflow-y: auto;
+      font-size: 12px;
+    }
+    .log-entry {
+      margin: 2px 0;
+      padding: 2px 0;
+    }
+  </style>
+</head>
+<body>
+  <h2>Упражнение 2 — Отслеживание прочтения сообщений (WeakSet)</h2>
+  <p>Сообщения обновляются автоматически. Вы можете только отметить как прочитанные. Полный журнал ниже.</p>
+  <div class="messages" id="messagesContainer"></div>
+
+  <div id="log"></div>
+
+  <script>
+    // === ИСХОДНЫЕ ДАННЫЕ ===
+    // Массив сообщений, моделирующий внешний источник данных.
+    // Объекты сообщений не должны быть изменены напрямую (например, нельзя добавлять свойство "read").
+    let messages = [
+      { text: "Привет", from: "Иван" },
+      { text: "Как дела?", from: "Иван" },
+      { text: "Увидимся скоро", from: "Анна" }
+    ];
+
+    // WeakSet используется для отслеживания прочитанных сообщений.
+    // Он автоматически удаляет ссылки на сообщения, когда те больше не доступны (например, удалены из массива),
+    // что предотвращает утечки памяти.
+    const readMessages = new WeakSet();
+
+    // Идентификатор таймера для автоматического обновления сообщений.
+    let updateIntervalId = null;
+
+    // Счётчик для генерации уникальных идентификаторов (в текущей версии не используется, но может пригодиться).
+    let messageCounter = 100;
+
+
+    // === LOGGING ===
+    function logEntry(msg) {
+      // Отображение записи на веб-странице
+      const logEl = document.getElementById("log");
+      const entry = document.createElement("div");
+      entry.className = "log-entry";
+      const time = new Date().toLocaleTimeString(); // Текущее время в формате ЧЧ:ММ:СС
+      entry.textContent = `[${time}] ${msg}`;
+      logEl.appendChild(entry);
+      // Автопрокрутка вниз, чтобы всегда видеть последнюю запись
+      logEl.scrollTop = logEl.scrollHeight;
+
+      // Дублирование записи в консоль браузера
+      console.log(`[LOG] ${msg}`);
+    }
+
+    // === MARK AS READ ===
+    // Добавляет переданный объект сообщения в WeakSet прочитанных.
+    // После этого обновляется отображение и записывается лог.
+    function markAsRead(msg) { // WeakSet не допускает дубликатов и работает только с объектами
+      readMessages.add(msg); // Перерисовка интерфейса
+      render();
+      logEntry(`✓ Отмечено как прочитанное: "${msg.text}" от ${msg.from}`);
+    }
+
+    // Проверяет, прочитано ли сообщение, с помощью метода .has() WeakSet'а.
+    function isRead(msg) {
+      return readMessages.has(msg);
+    }
+
+    // === МОДЕЛИРОВАНИЕ ВНЕШНИХ ОБНОВЛЕНИЙ ===
+    // Эта функция имитирует поведение внешней системы: она случайным образом
+    // добавляет новое сообщение или удаляет самое старое (из начала массива).
+    function simulateExternalUpdate() {
+      // Случайный выбор действия: "добавить" или "удалить"
+      const action = Math.random() > 0.5 ? "add" : "remove";
+
+      if (action === "add") {
+        // Генерация нового случайного сообщения
+        const senders = ["Иван", "Анна", "Борис", "Система", "Катя"];
+        const texts = ["Привет!", "Как дела?", "Посмотри это", "Новое сообщение", "Пинг", "Нужен ответ"];
+        const newMsg = {
+          text: texts[Math.floor(Math.random() * texts.length)],
+          from: senders[Math.floor(Math.random() * senders.length)]
+        };
+        messages.push(newMsg); // Добавление в конец массива
+        logEntry(`[+] ADDED: "${newMsg.text}" from ${newMsg.from}`);
+      } else if (messages.length > 0) {
+        // Удаление самого старого сообщения (из начала массива)
+        const removed = messages.shift(); // remove oldest
+        // Важно: если на удалённый объект больше нет ссылок, WeakSet автоматически его "забудет"
+        logEntry(`[-] УДАЛЕНО (самое старое): "${removed.text}" from ${removed.from} — будет удалено сборщиком мусора при отсутствии ссылок`);
+      }
+
+      // Дополнительная отладочная запись: текущее состояние всех сообщений
+      const state = messages.map((m, i) => 
+        `  ${i}: "${m.text}" (from ${m.from}) ${isRead(m) ? '[ПРОЧИТАНО]' : '[НЕ ПРОЧИТАНО]'}` 
+      ).join('\n');
+      logEntry(`📊 Current messages count: ${messages.length}\n${state}`);
+
+      // Перерисовка интерфейса после изменений
+      render();
+    }
+
+    // === ОТРИСОВКА ИНТЕРФЕЙСА ===
+    // Функция генерирует HTML-элементы для каждого сообщения на основе текущего состояния массива.
+    function render() {
+      const container = document.getElementById("messagesContainer");
+      container.innerHTML = ""; // Очистка контейнера
+
+      // Для каждого сообщения создаётся отдельный блок
+      messages.forEach((msg, idx) => {
+        const read = isRead(msg); // Проверка статуса прочтения
+        const div = document.createElement("div");
+        div.className = `message ${read ? 'read' : ''}`; // Добавляется CSS-класс для стилизации
+        // HTML-содержимое блока
+        div.innerHTML = `
+          <strong>${msg.from}</strong>: "${msg.text}" 
+          ${read ? '<em>[прочитано]</em>' : ''}
+          <!-- Кнопка активна только для непрочитанных сообщений -->
+          <button class="read-btn" ${read ? 'disabled' : ''} 
+                  onclick="window.markRead(${idx})">
+            Mark
+          </button>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    // === ГЛОБАЛЬНЫЙ ВСПОМОГАТЕЛЬНЫЙ МЕТОД ===
+    // Делает функцию доступной из атрибута onclick HTML-элемента.
+    // Принимает индекс сообщения и помечает его как прочитанное.
+    window.markRead = function(idx) {
+      if (idx >= 0 && idx < messages.length) {
+        markAsRead(messages[idx]);
+      }
+    };
+
+    // === ЗАПУСК АВТОМАТИЧЕСКИХ ОБНОВЛЕНИЙ ===
+    // Настраивает циклический вызов simulateExternalUpdate() с интервалом от 3 до 6 секунд.
+    function startAutoUpdates() {
+      if (updateIntervalId) return; // Защита от повторного запуска
+
+      // Функция возвращает случайную задержку в миллисекундах (от 3000 до 6000)
+      const nextDelay = () => 3000 + Math.random() * 3000; // 3–6 sec
+
+      // Рекурсивный вызов через setTimeout (лучше, чем setInterval, для переменных задержек)
+      const run = () => {
+        simulateExternalUpdate();
+        updateIntervalId = setTimeout(run, nextDelay());
+      };
+      updateIntervalId = setTimeout(run, nextDelay());
+    }
+
+    // === ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ===
+    // При первом запуске записывается стартовое сообщение в лог,
+    // отрисовываются исходные сообщения и запускается симулятор обновлений.
+    logEntry("▶️ Система запущена. Загружены начальные сообщения.");
+    render();
+    startAutoUpdates();
+  </script>
+</body>
+</html>
