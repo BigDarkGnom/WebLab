@@ -16,3 +16,6 @@
 - Vite 5
 - Bootstrap 5
 - Axios
+
+Ссылка на видеодемонстрацию
+https://disk.yandex.ru/i/rVobi2upIJo7fA
